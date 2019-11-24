@@ -19,6 +19,7 @@ team_t team = {
     ""                    	/* Second member email addr (leave blank if none) */
 };
 
+
 /**************
  * Symbol names
  **************/
@@ -44,6 +45,8 @@ team_t team = {
 /*******************
  * Macros for smooth
  *******************/
+#define DST(_i, _j)								_sym_dst[RIDX(_i, _j, _sym_dim)]
+
 #define add_color(offset_x, offset_y, color)	_sym_sum.color+=neighber(offset_x, offset_y).color
 #define add_number()							_sym_sum.num++
 #define add_pixel(offset_x, offset_y)							\
@@ -132,6 +135,7 @@ do {															\
 	add_function();												\
 	sum2pixel(pixel);											\
 } while(0)
+
 
 /***************
  * ROTATE KERNEL
@@ -264,6 +268,7 @@ static pixel avg(int dim, int i, int j, pixel *src)
 	return current_pixel;
 }
 
+
 /******************************************************
  * Your different versions of the smooth kernel go here
  ******************************************************/
@@ -289,72 +294,25 @@ char smooth_descr[] = "smooth: Current working version";
 void smooth(int dim, pixel *src, pixel *dst) 
 {
 	/**
-	 * Handle corner and edge pixels before a main loop.
+	 * Corners and edges first.
 	 * No if.
 	 */
+	int 					i = 0;
+	int 					j = 0;
+	pixel_sum 				sum = {0, };
 
-	int 		i = 0;
-	int 		j = 0;
-	pixel_sum 	sum = {0, };
-	pixel		current_pixel = {0, };
+	i=0; 		j=0;		add_to_pixel(add_2x2_tl, DST(0, 0));
+	i=0; 		j=dim-1;	add_to_pixel(add_2x2_tr, DST(0, dim-1));
+	i=dim-1;	j=0;		add_to_pixel(add_2x2_bl, DST(dim-1, 0));
+	i=dim-1; 	j=dim-1; 	add_to_pixel(add_2x2_br, DST(dim-1, dim-1));
 
-	// Top left corner
-	i=0; j=0;
-	add_to_pixel(add_2x2_tl, current_pixel);
-	dst[RIDX(0, 0, dim)] = current_pixel;
+	i=0; 					for (j = 1; j < dim-1; ++j) add_to_pixel(add_2x3_t, DST(0, j));
+	i=dim-1; 				for (j = 1; j < dim-1; ++j) add_to_pixel(add_2x3_b, DST(dim-1, j));
+	j=0; 					for (i = 1; i < dim-1; ++i) add_to_pixel(add_3x2_l, DST(i, 0));
+	j=dim-1;				for (i = 1; i < dim-1; ++i) add_to_pixel(add_3x2_r, DST(i, dim-1));
 
-	// Top right corner
-	i=0; j=dim-1;
-	add_to_pixel(add_2x2_tr, current_pixel);
-	dst[RIDX(0, dim-1, dim)] = current_pixel;
-
-	// Bottom left corner
-	i=dim-1; j=0;
-	add_to_pixel(add_2x2_bl, current_pixel);
-	dst[RIDX(dim-1, 0, dim)] = current_pixel;
-
-	// Bottom right corner
-	i=dim-1; j=dim-1;
-	add_to_pixel(add_2x2_br, current_pixel);
-	dst[RIDX(dim-1, dim-1, dim)] = current_pixel;
-
-	// Top edge
-	i=0;
-	for (j = 1; j < dim-1; ++j) {
-		add_to_pixel(add_2x3_t, current_pixel);
-		dst[RIDX(0, j, dim)] = current_pixel;
-	}	
-
-	// Bottom edge
-	i=dim-1;
-	for (j = 1; j < dim-1; ++j) {
-		add_to_pixel(add_2x3_b, current_pixel);
-		dst[RIDX(dim-1, j, dim)] = current_pixel;
-	}
-
-	// Left edge
-	j=0;
-	for (i = 1; i < dim-1; ++i) {
-		add_to_pixel(add_3x2_l, current_pixel);
-		dst[RIDX(i, 0, dim)] = current_pixel;
-	}
-
-	// Right edge
-	j=dim-1;
-	for (i = 1; i < dim-1; ++i) {
-		add_to_pixel(add_3x2_r, current_pixel);
-		dst[RIDX(i, dim-1, dim)] = current_pixel;
-	}
-
-	// Inside
-	for (i = 1; i < dim-1; ++i) {
-		for (j = 1; j < dim-1; ++j) {
-			add_to_pixel(add_3x3_mid, current_pixel);
-			dst[RIDX(i, j, dim)] = current_pixel;
-		}
-	}
+	for (i = 1; i < dim-1; ++i) for (j = 1; j < dim-1; ++j) add_to_pixel(add_3x3_mid, DST(i, j));
 }
-
 
 
 /********************************************************************* 
