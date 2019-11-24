@@ -129,7 +129,7 @@ do {															\
 	sum.num=0;													\
 } while(0)
 
-#define add_to_pixel(add_function, pixel)						\
+#define avg_to_pixel(add_function, pixel)						\
 do {															\
 	clear_sum();												\
 	add_function();												\
@@ -301,17 +301,17 @@ void smooth(int dim, pixel *src, pixel *dst)
 	int 					j = 0;
 	pixel_sum 				sum = {0, };
 
-	i=0; 		j=0;		add_to_pixel(add_2x2_tl, DST(0, 0));
-	i=0; 		j=dim-1;	add_to_pixel(add_2x2_tr, DST(0, dim-1));
-	i=dim-1;	j=0;		add_to_pixel(add_2x2_bl, DST(dim-1, 0));
-	i=dim-1; 	j=dim-1; 	add_to_pixel(add_2x2_br, DST(dim-1, dim-1));
+	i=0; 		j=0;		avg_to_pixel(add_2x2_tl, DST(0, 0));
+	i=0; 		j=dim-1;	avg_to_pixel(add_2x2_tr, DST(0, dim-1));
+	i=dim-1;	j=0;		avg_to_pixel(add_2x2_bl, DST(dim-1, 0));
+	i=dim-1; 	j=dim-1; 	avg_to_pixel(add_2x2_br, DST(dim-1, dim-1));
 
-	i=0; 					for (j = 1; j < dim-1; ++j) add_to_pixel(add_2x3_t, DST(0, j));
-	i=dim-1; 				for (j = 1; j < dim-1; ++j) add_to_pixel(add_2x3_b, DST(dim-1, j));
-	j=0; 					for (i = 1; i < dim-1; ++i) add_to_pixel(add_3x2_l, DST(i, 0));
-	j=dim-1;				for (i = 1; i < dim-1; ++i) add_to_pixel(add_3x2_r, DST(i, dim-1));
+	i=0; 					for (j = 1; j < dim-1; ++j) avg_to_pixel(add_2x3_t, DST(0, j));
+	i=dim-1; 				for (j = 1; j < dim-1; ++j) avg_to_pixel(add_2x3_b, DST(dim-1, j));
+	j=0; 					for (i = 1; i < dim-1; ++i) avg_to_pixel(add_3x2_l, DST(i, 0));
+	j=dim-1;				for (i = 1; i < dim-1; ++i) avg_to_pixel(add_3x2_r, DST(i, dim-1));
 
-	for (i = 1; i < dim-1; ++i) for (j = 1; j < dim-1; ++j) add_to_pixel(add_3x3_mid, DST(i, j));
+	for (i = 1; i < dim-1; ++i) for (j = 1; j < dim-1; ++j) avg_to_pixel(add_3x3_mid, DST(i, j));
 }
 
 
